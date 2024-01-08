@@ -156,6 +156,7 @@ let deletions = null
 
 function workLoop(deadline) {
   let shouldYield = false
+  // 在真是dom渲染前,完成fiber的组装 递归
   while (nextUnitOfWork && !shouldYield) {
     nextUnitOfWork = performUnitOfWork(
       nextUnitOfWork
@@ -163,6 +164,7 @@ function workLoop(deadline) {
     shouldYield = deadline.timeRemaining() < 1
   }
 
+  //这里提交commitRoot的时候已经完成所有的fiber便利, 提交完后wipRoot变成null不会在执行,下一个loop不会走这里
   if (!nextUnitOfWork && wipRoot) {
     commitRoot()
   }
@@ -243,6 +245,7 @@ function updateHostComponent(fiber) {
 
 function reconcileChildren(wipFiber, elements) {
   let index = 0
+  // 引用旧的fiber 没有旧的fiber则没有对比的需要
   let oldFiber =
     wipFiber.alternate && wipFiber.alternate.child
   let prevSibling = null
@@ -289,6 +292,7 @@ function reconcileChildren(wipFiber, elements) {
     }
 
     if (index === 0) {
+      //root 先给父节点挂第一个子,后续再兄弟
       wipFiber.child = newFiber
     } else if (element) {
       prevSibling.sibling = newFiber
